@@ -185,7 +185,66 @@ function durationToSeconds(time){
 // Returns: object with 10 properties or empty object {}
 // ============================================================
 function addShiftRecord(textFile, shiftObj) {
-    // TODO: Implement this function
+
+    let data = fs.readFileSync(textFile,"utf8")
+    let lines = data.trim().split("\n")
+    let header = lines[0]
+    let records = lines.slice(1)
+    for(let i = 0; i < records.length; i++){
+        let parts = records[i].split(",")
+        let driverID = parts[0]
+        let date = parts[2]
+
+        if(driverID == shiftObj.driverID && date == shiftObj.date){
+            return {}
+        }
+    }
+    let shiftDuration = getShiftDuration(shiftObj.startTime,shiftObj.endTime)
+    let idleTime = getIdleTime(shiftObj.startTime,shiftObj.endTime)
+    let activeTime = getActiveTime(shiftDuration,idleTime)
+    let quotaMet = metQuota(shiftObj.date,activeTime)
+    let hasBonus = false
+    let newObj = {
+        driverID: shiftObj.driverID,
+        driverName: shiftObj.driverName,
+        date: shiftObj.date,
+        startTime: shiftObj.startTime,
+        endTime: shiftObj.endTime,
+        shiftDuration: shiftDuration,
+        idleTime: idleTime,
+        activeTime: activeTime,
+        metQuota: quotaMet,
+        hasBonus: hasBonus
+    }
+    let newLine =
+    newObj.driverID + "," + //because csv format all need comma after, idk if spaces matter so no spaces to stay in safe side?
+    newObj.driverName + "," +
+    newObj.date + "," +
+    newObj.startTime + "," +
+    newObj.endTime + "," +
+    newObj.shiftDuration + "," +
+    newObj.idleTime + "," +
+    newObj.activeTime + "," +
+    newObj.metQuota + "," +
+    newObj.hasBonus
+
+    let lastIndex = -1
+
+    for(let i = 0; i < records.length; i++){
+        let parts = records[i].split(",")
+        if(parts[0] == shiftObj.driverID){
+            lastIndex = i
+        }
+    }
+    if(lastIndex == -1){
+        records.push(newLine)
+    }
+    else{
+        records.splice(lastIndex + 1,0,newLine)
+    }
+    let finalData = header + "\n" + records.join("\n")
+    fs.writeFileSync(textFile,finalData)
+    return newObj
 }
 
 // ============================================================
@@ -197,8 +256,23 @@ function addShiftRecord(textFile, shiftObj) {
 // Returns: nothing (void)
 // ============================================================
 function setBonus(textFile, driverID, date, newValue) {
-    // TODO: Implement this function
+
+    let data = fs.readFileSync(textFile,"utf8")
+    let lines = data.trim().split("\n")
+
+    for(let i = 1; i < lines.length; i++){
+        let parts = lines[i].split(",")
+
+        if(parts[0] == driverID && parts[2] == date){
+            parts[9] = String(newValue)
+            lines[i] = parts.join(",")
+            break
+        }
+    }
+
+    fs.writeFileSync(textFile,lines.join("\n"))
 }
+
 
 // ============================================================
 // Function 7: countBonusPerMonth(textFile, driverID, month)
