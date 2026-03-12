@@ -7,7 +7,7 @@ const fs = require("fs");
 // ============================================================
 function getShiftDuration(startTime, endTime) {
     // TODO: Implement this function
-function timeToSeconds(timeStr) {
+    function timeToSeconds(timeStr) {
         let parts = timeStr.trim().split(" ");
         let timePart = parts[0];
         let period = parts[1].toLowerCase();
@@ -114,8 +114,8 @@ function getIdleTime(startTime, endTime) {
 // Returns: string formatted as h:mm:ss
 // ============================================================
 
-    // TODO: Implement this functio
-    function getActiveTime(shiftDuration, idleTime) {
+// TODO: Implement this functio
+function getActiveTime(shiftDuration, idleTime) {
     function durationToSeconds(durationStr) {
         let parts = durationStr.trim().split(":");
         let hours = parseInt(parts[0]);
@@ -124,9 +124,9 @@ function getIdleTime(startTime, endTime) {
         return hours * 3600 + minutes * 60 + seconds;
     }
 
-function secondsToDuration(totalSeconds) {
-        let hours = Math.floor(totalSeconds / 3600);        
-    let minutes = Math.floor((totalSeconds % 3600) / 60);
+    function secondsToDuration(totalSeconds) {
+        let hours = Math.floor(totalSeconds / 3600);
+        let minutes = Math.floor((totalSeconds % 3600) / 60);
         let seconds = totalSeconds % 60;
 
         return hours + ":" + String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
@@ -146,32 +146,32 @@ function secondsToDuration(totalSeconds) {
 // ============================================================
 function metQuota(date, activeTime) {
     // TODO: Implement this function
-function durationToSeconds(time){
+    function durationToSeconds(time) {
         let parts = time.split(":")
         let h = parseInt(parts[0])
         let m = parseInt(parts[1])
         let s = parseInt(parts[2])
 
-        return h*3600 + m*60 + s
+        return h * 3600 + m * 60 + s
     }
 
     let activeSeconds = durationToSeconds(activeTime)
 
-    let normalQuota = 8*3600 + 24*60
-    let eidQuota = 6*3600
+    let normalQuota = 8 * 3600 + 24 * 60
+    let eidQuota = 6 * 3600
 
-    if(date >= "2025-04-10" && date <= "2025-04-30"){
-        if(activeSeconds >= eidQuota){
+    if (date >= "2025-04-10" && date <= "2025-04-30") {
+        if (activeSeconds >= eidQuota) {
             return true
         }
-        else{return false}
+        else { return false }
     }
 
-    else{
-        if(activeSeconds >= normalQuota){
+    else {
+        if (activeSeconds >= normalQuota) {
             return true
         }
-        else{
+        else {
             return false
         }
     }
@@ -185,23 +185,23 @@ function durationToSeconds(time){
 // ============================================================
 function addShiftRecord(textFile, shiftObj) {
 
-    let data = fs.readFileSync(textFile,"utf8")
+    let data = fs.readFileSync(textFile, "utf8")
     let lines = data.trim().split("\n")
     let header = lines[0]
     let records = lines.slice(1)
-    for(let i = 0; i < records.length; i++){
+    for (let i = 0; i < records.length; i++) {
         let parts = records[i].split(",")
         let driverID = parts[0]
         let date = parts[2]
 
-        if(driverID == shiftObj.driverID && date == shiftObj.date){
+        if (driverID == shiftObj.driverID && date == shiftObj.date) {
             return {}
         }
     }
-    let shiftDuration = getShiftDuration(shiftObj.startTime,shiftObj.endTime)
-    let idleTime = getIdleTime(shiftObj.startTime,shiftObj.endTime)
-    let activeTime = getActiveTime(shiftDuration,idleTime)
-    let quotaMet = metQuota(shiftObj.date,activeTime)
+    let shiftDuration = getShiftDuration(shiftObj.startTime, shiftObj.endTime)
+    let idleTime = getIdleTime(shiftObj.startTime, shiftObj.endTime)
+    let activeTime = getActiveTime(shiftDuration, idleTime)
+    let quotaMet = metQuota(shiftObj.date, activeTime)
     let hasBonus = false
     let newObj = {
         driverID: shiftObj.driverID,
@@ -216,33 +216,33 @@ function addShiftRecord(textFile, shiftObj) {
         hasBonus: hasBonus
     }
     let newLine =
-    newObj.driverID + "," + //because csv format all need comma after, idk if spaces matter so no spaces to stay in safe side?
-    newObj.driverName + "," +
-    newObj.date + "," +
-    newObj.startTime + "," +
-    newObj.endTime + "," +
-    newObj.shiftDuration + "," +
-    newObj.idleTime + "," +
-    newObj.activeTime + "," +
-    newObj.metQuota + "," +
-    newObj.hasBonus
+        newObj.driverID + "," + //because csv format all need comma after, idk if spaces matter so no spaces to stay in safe side?
+        newObj.driverName + "," +
+        newObj.date + "," +
+        newObj.startTime + "," +
+        newObj.endTime + "," +
+        newObj.shiftDuration + "," +
+        newObj.idleTime + "," +
+        newObj.activeTime + "," +
+        newObj.metQuota + "," +
+        newObj.hasBonus
 
     let lastIndex = -1
 
-    for(let i = 0; i < records.length; i++){
+    for (let i = 0; i < records.length; i++) {
         let parts = records[i].split(",")
-        if(parts[0] == shiftObj.driverID){
+        if (parts[0] == shiftObj.driverID) {
             lastIndex = i
         }
     }
-    if(lastIndex == -1){
+    if (lastIndex == -1) {
         records.push(newLine)
     }
-    else{
-        records.splice(lastIndex + 1,0,newLine)
+    else {
+        records.splice(lastIndex + 1, 0, newLine)
     }
     let finalData = header + "\n" + records.join("\n")
-    fs.writeFileSync(textFile,finalData)
+    fs.writeFileSync(textFile, finalData)
     return newObj
 }
 
@@ -256,20 +256,20 @@ function addShiftRecord(textFile, shiftObj) {
 // ============================================================
 function setBonus(textFile, driverID, date, newValue) {
 
-    let data = fs.readFileSync(textFile,"utf8")
+    let data = fs.readFileSync(textFile, "utf8")
     let lines = data.trim().split("\n")
 
-    for(let i = 1; i < lines.length; i++){
+    for (let i = 1; i < lines.length; i++) {
         let parts = lines[i].split(",")
 
-        if(parts[0] == driverID && parts[2] == date){
+        if (parts[0] == driverID && parts[2] == date) {
             parts[9] = String(newValue)
             lines[i] = parts.join(",")
             break
         }
     }
 
-    fs.writeFileSync(textFile,lines.join("\n"))
+    fs.writeFileSync(textFile, lines.join("\n"))
 }
 
 
@@ -281,7 +281,7 @@ function setBonus(textFile, driverID, date, newValue) {
 // Returns: number (-1 if driverID not found)
 // ============================================================
 function countBonusPerMonth(textFile, driverID, month) {
-    let data = fs.readFileSync(textFile,"utf8")
+    let data = fs.readFileSync(textFile, "utf8")
     let lines = data.trim().split("\n")
     let targetMonth = String(parseInt(month))
     let driverExists = false
@@ -289,23 +289,23 @@ function countBonusPerMonth(textFile, driverID, month) {
 
 
 
-    for(let i = 1; i < lines.length; i++){
-        let parts = lines[i].trim().split(",") 
+    for (let i = 1; i < lines.length; i++) {
+        let parts = lines[i].trim().split(",")
         let currentDriverID = parts[0].trim()
-        let currentDate = parts[2].trim()   
+        let currentDate = parts[2].trim()
         let hasBonus = parts[9].trim()
         let currentMonth = String(parseInt(currentDate.split("-")[1]))
-        if(currentDriverID == driverID){
+        if (currentDriverID == driverID) {
             driverExists = true
-            if(currentMonth == targetMonth && hasBonus == "true"){
+            if (currentMonth == targetMonth && hasBonus == "true") {
                 count++
             }
         }
     }
-    if(driverExists == false){
+    if (driverExists == false) {
         return -1
     }
-    return count 
+    return count
 }
 
 // ============================================================
@@ -316,29 +316,29 @@ function countBonusPerMonth(textFile, driverID, month) {
 // Returns: string formatted as hhh:mm:ss
 // ============================================================
 function getTotalActiveHoursPerMonth(textFile, driverID, month) {
- function durationToSeconds(time){ //need to replace all the durationToSeconds and secondsToDuration functions with  the helpers that iu will implement soon 
+    function durationToSeconds(time) { //need to replace all the durationToSeconds and secondsToDuration functions with  the helpers that iu will implement soon 
         let parts = time.trim().split(":")
         let h = parseInt(parts[0])
         let m = parseInt(parts[1])
         let s = parseInt(parts[2])
 
-        return h*3600 + m*60 + s
+        return h * 3600 + m * 60 + s
     }
 
-    function secondsToDuration(totalSeconds){
+    function secondsToDuration(totalSeconds) {
         let h = Math.floor(totalSeconds / 3600)
         let m = Math.floor((totalSeconds % 3600) / 60)
         let s = totalSeconds % 60
 
-        return h + ":" + String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0")
+        return h + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0")
     }
 
-    let data = fs.readFileSync(textFile,"utf8")
+    let data = fs.readFileSync(textFile, "utf8")
     let lines = data.trim().split("\n")
 
     let totalSeconds = 0
 
-    for(let i = 1; i < lines.length; i++){
+    for (let i = 1; i < lines.length; i++) {
         let parts = lines[i].trim().split(",")
 
         let currentDriverID = parts[0].trim()
@@ -347,7 +347,7 @@ function getTotalActiveHoursPerMonth(textFile, driverID, month) {
 
         let currentMonth = parseInt(currentDate.split("-")[1])
 
-        if(currentDriverID == driverID && currentMonth == month){
+        if (currentDriverID == driverID && currentMonth == month) {
             totalSeconds += durationToSeconds(activeTime)
         }
     }
@@ -365,26 +365,26 @@ function getTotalActiveHoursPerMonth(textFile, driverID, month) {
 // Returns: string formatted as hhh:mm:ss
 // ============================================================
 function getRequiredHoursPerMonth(textFile, rateFile, bonusCount, driverID, month) {
-   function secondsToDuration(totalSeconds){
+    function secondsToDuration(totalSeconds) {
         let h = Math.floor(totalSeconds / 3600)
         let m = Math.floor((totalSeconds % 3600) / 60)
         let s = totalSeconds % 60
 
-        return h + ":" + String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0")
+        return h + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0")
     }
 
-    let shiftData = fs.readFileSync(textFile,"utf8")
+    let shiftData = fs.readFileSync(textFile, "utf8")
     let shiftLines = shiftData.trim().split("\n")
 
-    let rateData = fs.readFileSync(rateFile,"utf8")
+    let rateData = fs.readFileSync(rateFile, "utf8")
     let rateLines = rateData.trim().split("\n")
 
     let dayOff = ""
 
-    for(let i = 1; i < rateLines.length; i++){
+    for (let i = 1; i < rateLines.length; i++) {
         let parts = rateLines[i].trim().split(",")
 
-        if(parts[0].trim() == driverID){
+        if (parts[0].trim() == driverID) {
             dayOff = parts[1].trim()
             break
         }
@@ -392,7 +392,7 @@ function getRequiredHoursPerMonth(textFile, rateFile, bonusCount, driverID, mont
 
     let totalRequiredSeconds = 0
 
-    for(let i = 1; i < shiftLines.length; i++){
+    for (let i = 1; i < shiftLines.length; i++) {
         let parts = shiftLines[i].trim().split(",")
 
         let currentDriverID = parts[0].trim()
@@ -400,17 +400,17 @@ function getRequiredHoursPerMonth(textFile, rateFile, bonusCount, driverID, mont
 
         let currentMonth = parseInt(currentDate.split("-")[1])
 
-        if(currentDriverID == driverID && currentMonth == month){
+        if (currentDriverID == driverID && currentMonth == month) {
 
-            let currentDayName = new Date(currentDate).toLocaleDateString("en-US",{weekday:"long", timeZone:"UTC"})
+            let currentDayName = new Date(currentDate).toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" })
 
-            if(currentDayName != dayOff){
+            if (currentDayName != dayOff) {
 
-                if(currentDate >= "2025-04-10" && currentDate <= "2025-04-30"){
-                    totalRequiredSeconds += 6*3600
+                if (currentDate >= "2025-04-10" && currentDate <= "2025-04-30") {
+                    totalRequiredSeconds += 6 * 3600
                 }
-                else{
-                    totalRequiredSeconds += 8*3600 + 24*60
+                else {
+                    totalRequiredSeconds += 8 * 3600 + 24 * 60
                 }
 
             }
@@ -419,12 +419,12 @@ function getRequiredHoursPerMonth(textFile, rateFile, bonusCount, driverID, mont
 
     totalRequiredSeconds -= bonusCount * 2 * 3600
 
-    if(totalRequiredSeconds < 0){
+    if (totalRequiredSeconds < 0) {
         totalRequiredSeconds = 0
     }
 
     return secondsToDuration(totalRequiredSeconds)
-    
+
 }
 
 // ============================================================
@@ -436,26 +436,26 @@ function getRequiredHoursPerMonth(textFile, rateFile, bonusCount, driverID, mont
 // Returns: integer (net pay)
 // ============================================================
 function getNetPay(driverID, actualHours, requiredHours, rateFile) {
-    function durationToSeconds(time){
+    function durationToSeconds(time) {
         let parts = time.trim().split(":")
         let h = parseInt(parts[0])
         let m = parseInt(parts[1])
         let s = parseInt(parts[2])
 
-        return h*3600 + m*60 + s
+        return h * 3600 + m * 60 + s
     }
 
-    let data = fs.readFileSync(rateFile,"utf8")
+    let data = fs.readFileSync(rateFile, "utf8")
     let lines = data.trim().split("\n")
 
     let basePay = 0
     let tier = 0
 
-    // for(let i = 1; i < lines.length; i++){ start for 0 not 1 because of header
-    for(let i=0; i< lines.length; i++){
+    // for(let i = 1; i < lines.length; i++){ start from 0 not 1 because of header
+    for (let i = 0; i < lines.length; i++) {
         let parts = lines[i].trim().split(",")
 
-        if(parts[0].trim() == driverID){
+        if (parts[0].trim() == driverID) {
             basePay = parseInt(parts[2])
             tier = parseInt(parts[3])
             break
@@ -465,7 +465,7 @@ function getNetPay(driverID, actualHours, requiredHours, rateFile) {
     let actualSeconds = durationToSeconds(actualHours)
     let requiredSeconds = durationToSeconds(requiredHours)
 
-    if(actualSeconds >= requiredSeconds){
+    if (actualSeconds >= requiredSeconds) {
         return basePay
     }
 
@@ -473,22 +473,22 @@ function getNetPay(driverID, actualHours, requiredHours, rateFile) {
     let missingHours = Math.floor(missingSeconds / 3600)
     let allowedHours = 0
 
-    if(tier == 1){
+    if (tier == 1) {
         allowedHours = 50
     }
-    else if(tier == 2){
+    else if (tier == 2) {
         allowedHours = 20
     }
-    else if(tier == 3){
+    else if (tier == 3) {
         allowedHours = 10
     }
-    else if(tier == 4){
+    else if (tier == 4) {
         allowedHours = 3
     }
 
     let billableMissingHours = missingHours - allowedHours
 
-    if(billableMissingHours < 0){
+    if (billableMissingHours < 0) {
         billableMissingHours = 0
     }
 
