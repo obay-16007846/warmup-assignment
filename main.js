@@ -365,7 +365,65 @@ function getTotalActiveHoursPerMonth(textFile, driverID, month) {
 // Returns: string formatted as hhh:mm:ss
 // ============================================================
 function getRequiredHoursPerMonth(textFile, rateFile, bonusCount, driverID, month) {
+   function secondsToDuration(totalSeconds){
+        let h = Math.floor(totalSeconds / 3600)
+        let m = Math.floor((totalSeconds % 3600) / 60)
+        let s = totalSeconds % 60
 
+        return h + ":" + String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0")
+    }
+
+    let shiftData = fs.readFileSync(textFile,"utf8")
+    let shiftLines = shiftData.trim().split("\n")
+
+    let rateData = fs.readFileSync(rateFile,"utf8")
+    let rateLines = rateData.trim().split("\n")
+
+    let dayOff = ""
+
+    for(let i = 1; i < rateLines.length; i++){
+        let parts = rateLines[i].trim().split(",")
+
+        if(parts[0].trim() == driverID){
+            dayOff = parts[1].trim()
+            break
+        }
+    }
+
+    let totalRequiredSeconds = 0
+
+    for(let i = 1; i < shiftLines.length; i++){
+        let parts = shiftLines[i].trim().split(",")
+
+        let currentDriverID = parts[0].trim()
+        let currentDate = parts[2].trim()
+
+        let currentMonth = parseInt(currentDate.split("-")[1])
+
+        if(currentDriverID == driverID && currentMonth == month){
+
+            let currentDayName = new Date(currentDate).toLocaleDateString("en-US",{weekday:"long", timeZone:"UTC"})
+
+            if(currentDayName != dayOff){
+
+                if(currentDate >= "2025-04-10" && currentDate <= "2025-04-30"){
+                    totalRequiredSeconds += 6*3600
+                }
+                else{
+                    totalRequiredSeconds += 8*3600 + 24*60
+                }
+
+            }
+        }
+    }
+
+    totalRequiredSeconds -= bonusCount * 2 * 3600
+
+    if(totalRequiredSeconds < 0){
+        totalRequiredSeconds = 0
+    }
+
+    return secondsToDuration(totalRequiredSeconds)
     
 }
 
@@ -378,7 +436,66 @@ function getRequiredHoursPerMonth(textFile, rateFile, bonusCount, driverID, mont
 // Returns: integer (net pay)
 // ============================================================
 function getNetPay(driverID, actualHours, requiredHours, rateFile) {
-    // TODO: Implement this function
+    function durationToSeconds(time){
+        let parts = time.trim().split(":")
+        let h = parseInt(parts[0])
+        let m = parseInt(parts[1])
+        let s = parseInt(parts[2])
+
+        return h*3600 + m*60 + s
+    }
+
+    let data = fs.readFileSync(rateFile,"utf8")
+    let lines = data.trim().split("\n")
+
+    let basePay = 0
+    let tier = 0
+
+    // for(let i = 1; i < lines.length; i++){ start for 0 not 1 because of header
+    for(let i=0; i< lines.length; i++){
+        let parts = lines[i].trim().split(",")
+
+        if(parts[0].trim() == driverID){
+            basePay = parseInt(parts[2])
+            tier = parseInt(parts[3])
+            break
+        }
+    }
+
+    let actualSeconds = durationToSeconds(actualHours)
+    let requiredSeconds = durationToSeconds(requiredHours)
+
+    if(actualSeconds >= requiredSeconds){
+        return basePay
+    }
+
+    let missingSeconds = requiredSeconds - actualSeconds
+    let missingHours = Math.floor(missingSeconds / 3600)
+    let allowedHours = 0
+
+    if(tier == 1){
+        allowedHours = 50
+    }
+    else if(tier == 2){
+        allowedHours = 20
+    }
+    else if(tier == 3){
+        allowedHours = 10
+    }
+    else if(tier == 4){
+        allowedHours = 3
+    }
+
+    let billableMissingHours = missingHours - allowedHours
+
+    if(billableMissingHours < 0){
+        billableMissingHours = 0
+    }
+
+    let deductionRatePerHour = Math.floor(basePay / 185)
+    let salaryDeduction = billableMissingHours * deductionRatePerHour
+
+    return basePay - salaryDeduction
 }
 
 module.exports = {
