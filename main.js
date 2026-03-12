@@ -1,5 +1,4 @@
 const fs = require("fs");
-
 // ============================================================
 // Function 1: getShiftDuration(startTime, endTime)
 // startTime: (typeof string) formatted as hh:mm:ss am or hh:mm:ss pm
@@ -291,7 +290,7 @@ function countBonusPerMonth(textFile, driverID, month) {
 
 
     for(let i = 1; i < lines.length; i++){
-        let parts = lines[i].trim().split(",")
+        let parts = lines[i].trim().split(",") 
         let currentDriverID = parts[0].trim()
         let currentDate = parts[2].trim()   
         let hasBonus = parts[9].trim()
@@ -306,7 +305,7 @@ function countBonusPerMonth(textFile, driverID, month) {
     if(driverExists == false){
         return -1
     }
-    return count
+    return count 
 }
 
 // ============================================================
@@ -317,7 +316,43 @@ function countBonusPerMonth(textFile, driverID, month) {
 // Returns: string formatted as hhh:mm:ss
 // ============================================================
 function getTotalActiveHoursPerMonth(textFile, driverID, month) {
-    // TODO: Implement this function
+ function durationToSeconds(time){ //need to replace all the durationToSeconds and secondsToDuration functions with  the helpers that iu will implement soon 
+        let parts = time.trim().split(":")
+        let h = parseInt(parts[0])
+        let m = parseInt(parts[1])
+        let s = parseInt(parts[2])
+
+        return h*3600 + m*60 + s
+    }
+
+    function secondsToDuration(totalSeconds){
+        let h = Math.floor(totalSeconds / 3600)
+        let m = Math.floor((totalSeconds % 3600) / 60)
+        let s = totalSeconds % 60
+
+        return h + ":" + String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0")
+    }
+
+    let data = fs.readFileSync(textFile,"utf8")
+    let lines = data.trim().split("\n")
+
+    let totalSeconds = 0
+
+    for(let i = 1; i < lines.length; i++){
+        let parts = lines[i].trim().split(",")
+
+        let currentDriverID = parts[0].trim()
+        let currentDate = parts[2].trim()
+        let activeTime = parts[7].trim()
+
+        let currentMonth = parseInt(currentDate.split("-")[1])
+
+        if(currentDriverID == driverID && currentMonth == month){
+            totalSeconds += durationToSeconds(activeTime)
+        }
+    }
+
+    return secondsToDuration(totalSeconds)
 }
 
 // ============================================================
@@ -330,7 +365,8 @@ function getTotalActiveHoursPerMonth(textFile, driverID, month) {
 // Returns: string formatted as hhh:mm:ss
 // ============================================================
 function getRequiredHoursPerMonth(textFile, rateFile, bonusCount, driverID, month) {
-    // TODO: Implement this function
+
+    
 }
 
 // ============================================================
