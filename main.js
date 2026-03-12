@@ -147,6 +147,35 @@ function secondsToDuration(totalSeconds) {
 // ============================================================
 function metQuota(date, activeTime) {
     // TODO: Implement this function
+function durationToSeconds(time){
+        let parts = time.split(":")
+        let h = parseInt(parts[0])
+        let m = parseInt(parts[1])
+        let s = parseInt(parts[2])
+
+        return h*3600 + m*60 + s
+    }
+
+    let activeSeconds = durationToSeconds(activeTime)
+
+    let normalQuota = 8*3600 + 24*60
+    let eidQuota = 6*3600
+
+    if(date >= "2025-04-10" && date <= "2025-04-30"){
+        if(activeSeconds >= eidQuota){
+            return true
+        }
+        else{return false}
+    }
+
+    else{
+        if(activeSeconds >= normalQuota){
+            return true
+        }
+        else{
+            return false
+        }
+    }
 }
 
 // ============================================================
