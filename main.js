@@ -51,7 +51,7 @@ function getShiftDuration(startTime, endTime) { //replaced with simplified helpe
     
     if(endSeconds < startSeconds) {
         endSeconds += 24 * 3600
-    }
+    }//added to prevent negative time when shift goes after  00:00
     
     let durationSeconds = endSeconds - startSeconds
 
