@@ -46,8 +46,13 @@ function secondsToDuration(totalSeconds) {
 // Returns: string formatted as h:mm:ss
 // ============================================================
 function getShiftDuration(startTime, endTime) { //replaced with simplified helper method
-let startSeconds = timeToSeconds(startTime)
+    let startSeconds = timeToSeconds(startTime)
     let endSeconds = timeToSeconds(endTime)
+    
+    if(endSeconds < startSeconds) {
+        endSeconds += 24 * 3600
+    }
+    
     let durationSeconds = endSeconds - startSeconds
 
     return secondsToDuration(durationSeconds)
@@ -61,7 +66,7 @@ let startSeconds = timeToSeconds(startTime)
 // Returns: string formatted as h:mm:ss
 // ============================================================
 function getIdleTime(startTime, endTime) { //replaced with simplified helper method
-   let startSeconds = timeToSeconds(startTime)
+    let startSeconds = timeToSeconds(startTime)
     let endSeconds = timeToSeconds(endTime)
 
     let deliveryStart = 8 * 3600
@@ -89,7 +94,7 @@ function getIdleTime(startTime, endTime) { //replaced with simplified helper met
 
 // TODO: Implement this functio
 function getActiveTime(shiftDuration, idleTime) {
-     let shiftSeconds = durationToSeconds(shiftDuration)
+    let shiftSeconds = durationToSeconds(shiftDuration)
     let idleSeconds = durationToSeconds(idleTime)
     let activeSeconds = shiftSeconds - idleSeconds
 
@@ -105,7 +110,7 @@ function getActiveTime(shiftDuration, idleTime) {
 // ============================================================
 function metQuota(date, activeTime) {
     // TODO: Implement this function
-     let activeSeconds = durationToSeconds(activeTime)
+    let activeSeconds = durationToSeconds(activeTime)
 
     let normalQuota = 8 * 3600 + 24 * 60
     let eidQuota = 6 * 3600
@@ -360,7 +365,7 @@ function getRequiredHoursPerMonth(textFile, rateFile, bonusCount, driverID, mont
 // Returns: integer (net pay)
 // ============================================================
 function getNetPay(driverID, actualHours, requiredHours, rateFile) {
-let data = fs.readFileSync(rateFile, "utf8")
+    let data = fs.readFileSync(rateFile, "utf8")
     let lines = data.trim().split("\n")
 
     let basePay = 0
